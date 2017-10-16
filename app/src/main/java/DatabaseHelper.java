@@ -16,12 +16,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(DatabaseContract.Term.CREATE_TABLE);
+        db.execSQL("PRAGMA foreign_keys=ON;");
+        db.execSQL(DatabaseContract.Terms.CREATE_TABLE);
+        db.execSQL(DatabaseContract.Mentors.CREATE_TABLE);
+        db.execSQL(DatabaseContract.PhoneNumbers.CREATE_TABLE);
+        db.execSQL(DatabaseContract.Emails.CREATE_TABLE);
+        db.execSQL(DatabaseContract.Courses.CREATE_TABLE);
+        db.execSQL(DatabaseContract.Assessments.CREATE_TABLE);
+        db.execSQL(DatabaseContract.Notes.CREATE_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + DatabaseContract.Term.TABLE_NAME);
+        db.execSQL("PRAGMA foreign_keys=ON;");
+        db.execSQL("DROP TABLE IF EXISTS " + DatabaseContract.Terms.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DatabaseContract.Mentors.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DatabaseContract.PhoneNumbers.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DatabaseContract.Emails.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DatabaseContract.Courses.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DatabaseContract.Assessments.TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + DatabaseContract.Notes.TABLE_NAME);
 
         onCreate(db);
     }
