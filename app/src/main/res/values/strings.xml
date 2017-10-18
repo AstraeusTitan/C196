@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">C196</string>
     <string name="terms">Terms</string>
+    <string name="termDetail">Term Detail</string>
+    <string name="termStart">Term Start</string>
+    <string name="termEnd">Term End</string>
+    <string name="title">Title</string>
+    <string name="save">Save</string>
 </resources>

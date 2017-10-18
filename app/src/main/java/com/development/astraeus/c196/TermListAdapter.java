@@ -38,9 +38,14 @@ public class TermListAdapter extends CursorAdapter {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseContract.Terms.COLUMN_START)));
-        startLabel.setText(new SimpleDateFormat("dd-mm-yyyy").format(calendar.getTime()));
+        startLabel.setText(new SimpleDateFormat("dd/MM/yyyy").format(calendar.getTime()));
 
         calendar.setTimeInMillis(cursor.getLong(cursor.getColumnIndexOrThrow(DatabaseContract.Terms.COLUMN_END)));
-        endLabel.setText(new SimpleDateFormat("dd-mm-yyyy").format(calendar.getTime()));
+        endLabel.setText(new SimpleDateFormat("dd/MM/yyyy").format(calendar.getTime()));
+    }
+
+    @Override
+    public Object getItem(int position) {
+        return super.getItem(position);
     }
 }
