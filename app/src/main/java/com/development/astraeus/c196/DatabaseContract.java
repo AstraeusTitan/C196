@@ -8,7 +8,12 @@ import android.provider.BaseColumns;
 
 class DatabaseContract {
     //Store used queries as final strings here
-    static final String SELECT_ALL_TERMS = "SELECT * FROM " + Terms.TABLE_NAME;
+    static final String SELECT_ALL_TERMS = "SELECT * FROM " + Terms.TABLE_NAME + " ORDER BY " + Terms.COLUMN_START;
+    static final String SELECT_ALL_TERM_TITLES_ORDERED_BY_START = "SELECT " + Terms.COLUMN_TITLE + " FROM " + Terms.TABLE_NAME + " ORDER BY " + Terms.COLUMN_START;
+    static final String SELECT_TERM_BY_ID = "SELECT * FROM " + Terms.TABLE_NAME + " WHERE " + Terms._ID + "=?";
+    static final String SELECT_TERM_BY_TITLE = "SELECT * FROM " + Terms.TABLE_NAME + " WHERE " + Terms.COLUMN_TITLE + " LIKE ?";
+    static final String SELECT_ALL_COURSES_ORDERED_BY_TERM = "SELECT * FROM " + Courses.TABLE_NAME + " ORDER BY " + Courses.COLUMN_TERM_ID;
+    static final String SELECT_ALL_MENTOR_NAMES_ORDERED_ALPHABETICALLY = "SELECT " + Courses.COLUMN_MENTOR_NAME + " FROM " + Courses.TABLE_NAME + " ORDER BY " + Courses.COLUMN_MENTOR_NAME;
 
     private DatabaseContract(){}
 
@@ -28,44 +33,12 @@ class DatabaseContract {
                 COLUMN_CURRENT + " INTEGER"+ ")";
     }
 
-    static class Mentors implements BaseColumns{
-        static final String TABLE_NAME = "mentors";
-        static final String COLUMN_NAME = "name";
-
-        static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " +
-                TABLE_NAME + " (" +
-                _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_NAME + " TEXT" + ")";
-    }
-
-    static class PhoneNumbers implements BaseColumns{
-        static final String TABLE_NAME = "phoneNumbers";
-        static final String COLUMN_MENTOR_ID = "mentorId";
-        static final String COLUMN_NUMBER = "number";
-
-        static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " +
-                TABLE_NAME + " (" +
-                _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_MENTOR_ID + " INTEGER, " +
-                COLUMN_NUMBER + " TEXT" + ")";
-    }
-
-    static class Emails implements BaseColumns{
-        static final String TABLE_NAME = "emails";
-        static final String COLUMN_MENTOR_ID = "mentorId";
-        static final String COLUMN_ADDRESS = "address";
-
-        static final String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS " +
-                TABLE_NAME + " (" +
-                _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_MENTOR_ID + " INTEGER, " +
-                COLUMN_ADDRESS + " TEXT" + ")";
-    }
-
     static class Courses implements BaseColumns{
         static final String TABLE_NAME = "courses";
         static final String COLUMN_TERM_ID = "termId";
-        static final String COLUMN_MENTOR_ID = "mentorId";
+        static final String COLUMN_MENTOR_NAME = "mentorName";
+        static final String COLUMN_MENTOR_PHONE_NUMBER = "mentorPhoneNumber";
+        static final String COLUMN_MENTOR_EMAIL = "mentorEmail";
         static final String COLUMN_TITLE = "title";
         static final String COLUMN_START = "start";
         static final String COLUMN_EXPECTED_END = "expectedEnd";
@@ -75,10 +48,12 @@ class DatabaseContract {
                 TABLE_NAME + " (" +
                 _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_TERM_ID + " INTEGER, " +
-                COLUMN_MENTOR_ID + " INTEGER, " +
                 COLUMN_TITLE + " TEXT, " +
                 COLUMN_START + " INTEGER, " +
                 COLUMN_EXPECTED_END + " INTEGER, " +
+                COLUMN_MENTOR_NAME + " TEXT, " +
+                COLUMN_MENTOR_PHONE_NUMBER + " TEXT, " +
+                COLUMN_MENTOR_EMAIL + " TEXT, " +
                 COLUMN_STATUS + " TEXT" + ")";
     }
 

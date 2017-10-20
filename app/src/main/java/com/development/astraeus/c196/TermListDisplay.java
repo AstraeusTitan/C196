@@ -32,6 +32,7 @@ public class TermListDisplay extends AppCompatActivity {
                 String title = item.getString(item.getColumnIndexOrThrow(DatabaseContract.Terms.COLUMN_TITLE));
                 long start = item.getLong(item.getColumnIndexOrThrow(DatabaseContract.Terms.COLUMN_START));
                 long end = item.getLong(item.getColumnIndexOrThrow(DatabaseContract.Terms.COLUMN_END));
+
                 Intent intent = new Intent(TermListDisplay.this, TermDetailDisplay.class);
                 intent.putExtra("termId", itemId);
                 intent.putExtra("title", title);

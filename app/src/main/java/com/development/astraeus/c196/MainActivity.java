@@ -20,5 +20,13 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(new Intent(MainActivity.this, com.development.astraeus.c196.TermListDisplay.class));
             }
         });
+
+        Button coursesButton = (Button) findViewById(R.id.coursesButton);
+        coursesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, com.development.astraeus.c196.CourseListDisplay.class));
+            }
+        });
     }
 }

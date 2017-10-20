@@ -1,9 +1,22 @@
 <resources>
     <string name="app_name">C196</string>
     <string name="terms">Terms</string>
+    <string name="term">Term</string>
     <string name="termDetail">Term Detail</string>
     <string name="termStart">Term Start</string>
     <string name="termEnd">Term End</string>
+    <string name="termTitle">Term Title</string>
+    <string name="courses">Courses</string>
+    <string name="courseDetail">Course Detail</string>
+    <string name="courseTitle">Course Title</string>
+    <string name="courseStart">Course Start</string>
+    <string name="expectedEnd">Expected End</string>
+    <string name="status">Status</string>
+    <string name="mentor">Mentor</string>
+    <string name="phoneNumber">Phone Number</string>
+    <string name="email">Email</string>
     <string name="title">Title</string>
     <string name="save">Save</string>
+    <string name="dateFormatHint">DD/MM/YYYY</string>
+    <string name="rightArrow">-></string>
 </resources>
