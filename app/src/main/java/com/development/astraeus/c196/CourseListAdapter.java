@@ -13,7 +13,7 @@ import android.widget.TextView;
  */
 
 class CourseListAdapter extends CursorAdapter {
-    private int currentTermId = -1;
+    private static int currentTermId = -1;
     CourseListAdapter(Context context, Cursor c) {
         super(context, c, false);
     }
