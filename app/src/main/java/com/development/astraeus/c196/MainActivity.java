@@ -13,6 +13,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+//        deleteDatabase(DatabaseHelper.DATABASE_NAME);
+
         Button termsButton = (Button) findViewById(R.id.termsButton);
         termsButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -26,6 +28,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(MainActivity.this, com.development.astraeus.c196.CourseListDisplay.class));
+            }
+        });
+
+        Button assessmentsButton = (Button) findViewById(R.id.assessmentsButton);
+        assessmentsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, com.development.astraeus.c196.AssessmentListDisplay.class));
             }
         });
     }

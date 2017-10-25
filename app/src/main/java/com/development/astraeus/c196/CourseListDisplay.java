@@ -17,13 +17,11 @@ public class CourseListDisplay extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_list_display);
 
-        DatabaseHelper dbHelper = new DatabaseHelper(this);
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(DatabaseContract.SELECT_ALL_COURSES_ORDERED_BY_TERM, new String[] {});
+        setHandlers();
+    }
 
+    private void setHandlers() {
         ListView coursesList = (ListView) findViewById(R.id.coursesList);
-        CourseListAdapter adapter = new CourseListAdapter(this, cursor);
-        coursesList.setAdapter(adapter);
         coursesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -31,7 +29,7 @@ public class CourseListDisplay extends AppCompatActivity {
                 int courseId = item.getInt(item.getColumnIndexOrThrow(DatabaseContract.Courses._ID));
                 int termId = item.getInt(item.getColumnIndexOrThrow(DatabaseContract.Courses.COLUMN_TERM_ID));
                 String title = item.getString(item.getColumnIndexOrThrow(DatabaseContract.Courses.COLUMN_TITLE));
-                long start = item.getLong(item.getColumnIndexOrThrow(DatabaseContract.Terms.COLUMN_START));
+                long start = item.getLong(item.getColumnIndexOrThrow(DatabaseContract.Courses.COLUMN_START));
                 long expectedEnd = item.getLong(item.getColumnIndexOrThrow(DatabaseContract.Courses.COLUMN_EXPECTED_END));
                 String mentorName = item.getString(item.getColumnIndexOrThrow(DatabaseContract.Courses.COLUMN_MENTOR_NAME));
                 String phoneNumber = item.getString(item.getColumnIndexOrThrow(DatabaseContract.Courses.COLUMN_MENTOR_PHONE_NUMBER));
@@ -59,5 +57,25 @@ public class CourseListDisplay extends AppCompatActivity {
                 startActivity(new Intent(CourseListDisplay.this, CourseDetailDisplay.class));
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateList();
+    }
+
+    private void updateList() {
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(DatabaseContract.SELECT_ALL_COURSES_ORDERED_BY_TERM, new String[]{});
+
+        ListView courseList = (ListView) findViewById(R.id.coursesList);
+        CourseListAdapter adapter = (CourseListAdapter) courseList.getAdapter();
+        if(adapter == null){
+            courseList.setAdapter(new CourseListAdapter(this, cursor));
+        } else {
+            adapter.swapCursor(cursor);
+        }
     }
 }

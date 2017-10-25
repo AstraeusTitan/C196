@@ -21,29 +21,36 @@
             android:label="@string/terms">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value=".MainActivity" />
         </activity>
         <activity
             android:name=".TermDetailDisplay"
-            android:label="@string/termDetail">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".TermListDisplay"/>
-        </activity>
+            android:label="@string/termDetail" />
         <activity
             android:name=".CourseListDisplay"
             android:label="@string/courses">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity"/>
+                android:value=".MainActivity" />
         </activity>
         <activity
             android:name=".CourseDetailDisplay"
-            android:label="@string/courseDetail">
+            android:label="@string/courseDetail" />
+        <activity
+            android:name=".AssessmentListDisplay"
+            android:label="@string/assessments">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".CourseListDisplay"/>
+                android:value=".MainActivity" />
         </activity>
+        <activity
+            android:name=".AssessmentDetailDisplay"
+            android:label="@string/assessmentDetail"
+            android:noHistory="true" />
+        <activity
+            android:name=".NoteDetailDisplay"
+            android:label="@string/note_detail"
+            android:noHistory="true"/>
     </application>
 
 </manifest>
