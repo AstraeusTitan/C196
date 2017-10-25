@@ -13,7 +13,8 @@ import android.widget.TextView;
  */
 
 class CourseListAdapter extends CursorAdapter {
-    private static int currentTermId = -1;
+    private int currentTermId = -1;
+    private boolean subHeaderVisibility = true;
     CourseListAdapter(Context context, Cursor c) {
         super(context, c, false);
     }
@@ -36,15 +37,21 @@ class CourseListAdapter extends CursorAdapter {
         statusLabel.setText(courseStatus);
 
         int termId = cursor.getInt(cursor.getColumnIndexOrThrow(DatabaseContract.Courses.COLUMN_TERM_ID));
-        if(termId != currentTermId) {
-            currentTermId = termId;
-            subHeader.setVisibility(View.VISIBLE);
-            if(termId < 1){
-                subHeader.setText("No Term");
+        if(subHeaderVisibility){
+            if(termId != currentTermId){
+                currentTermId = termId;
+                subHeader.setVisibility(View.VISIBLE);
+                if(termId < 1){
+                    subHeader.setText("No Term");
+                } else {
+                    DatabaseHelper dbHelper = new DatabaseHelper(context);
+                    subHeader.setText(dbHelper.getCourseTitleFromId(currentTermId));
+                }
             } else {
-                DatabaseHelper dbHelper = new DatabaseHelper(context);
-                subHeader.setText(dbHelper.getTermTitleFromId(currentTermId));
+                subHeader.setVisibility(View.GONE);
             }
+        } else {
+            subHeader.setVisibility(View.GONE);
         }
     }
 
@@ -52,4 +59,15 @@ class CourseListAdapter extends CursorAdapter {
     public Object getItem(int position){
         return super.getItem(position);
     }
+
+    @Override
+    public Cursor swapCursor(Cursor newCursor) {
+        currentTermId = -1;
+        return super.swapCursor(newCursor);
+    }
+
+    public void setSubHeaderVisibility(boolean tf){
+        subHeaderVisibility = tf;
+    }
+
 }

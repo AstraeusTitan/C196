@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -40,7 +41,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public List<String> getMentorNames(){
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor mentorsCursor = db.rawQuery(DatabaseContract.SELECT_ALL_MENTOR_NAMES_ORDERED_ALPHABETICALLY, null);
+        Cursor mentorsCursor = db.rawQuery(DatabaseContract.SELECT_ALL_MENTOR_NAMES_ORDERED_ALPHABETICALLY, new String[]{});
         List<String> mentorNames = new ArrayList<>();
         if(mentorsCursor.moveToFirst()){
             do {
@@ -49,19 +50,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         mentorsCursor.close();
         return mentorNames;
-    }
-
-    public List<String> getTermTitles(){
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor termsCursor = db.rawQuery(DatabaseContract.SELECT_ALL_TERM_TITLES_ORDERED_BY_START, null);
-        List<String> termTitles = new ArrayList<>();
-        if(termsCursor.moveToFirst()){
-            do {
-                termTitles.add(termsCursor.getString(termsCursor.getColumnIndexOrThrow(DatabaseContract.Terms.COLUMN_TITLE)));
-            } while (termsCursor.moveToNext());
-        }
-        termsCursor.close();
-        return termTitles;
     }
 
     public String getTermTitleFromId(int termId){
@@ -86,5 +74,55 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int termId = termsCursor.getInt(termsCursor.getColumnIndexOrThrow(DatabaseContract.Terms._ID));
         termsCursor.close();
         return termId;
+    }
+
+    public List<String> getTermTitles(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor termsCursor = db.rawQuery(DatabaseContract.SELECT_ALL_TERM_TITLES_ORDERED_BY_START, new String[]{});
+        List<String> termTitles = new ArrayList<>();
+        if(termsCursor.moveToFirst()){
+            do {
+                termTitles.add(termsCursor.getString(termsCursor.getColumnIndexOrThrow(DatabaseContract.Terms.COLUMN_TITLE)));
+            } while (termsCursor.moveToNext());
+        }
+        termsCursor.close();
+        return termTitles;
+    }
+
+    public String getCourseTitleFromId(int courseId) {
+        if(courseId < 1){
+            return "";
+        }
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor coursesCursor = db.rawQuery(DatabaseContract.SELECT_COURSE_BY_ID, new String[]{"" + courseId});
+        coursesCursor.moveToFirst();
+        String courseTitle = coursesCursor.getString(coursesCursor.getColumnIndexOrThrow(DatabaseContract.Courses.COLUMN_TITLE));
+        coursesCursor.close();
+        return courseTitle;
+    }
+
+    public int getCourseIdFromTitle(String courseTitle){
+        if(courseTitle.equals("")){
+            return -1;
+        }
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor coursesCursor = db.rawQuery(DatabaseContract.SELECT_COURSE_BY_TITLE, new String[]{courseTitle});
+        coursesCursor.moveToFirst();
+        int courseId = coursesCursor.getInt(coursesCursor.getColumnIndexOrThrow(DatabaseContract.Courses._ID));
+        coursesCursor.close();
+        return courseId;
+    }
+
+    public List<String> getCourseTitles() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor coursesCursor = db.rawQuery(DatabaseContract.SELECT_ALL_COURSE_TITLES_ORDERED_BY_START, new String[]{});
+        List<String> courseTitles = new ArrayList<>();
+        if(coursesCursor.moveToFirst()){
+            do {
+                courseTitles.add(coursesCursor.getString(coursesCursor.getColumnIndexOrThrow(DatabaseContract.Courses.COLUMN_TITLE)));
+            } while (coursesCursor.moveToNext());
+        }
+        coursesCursor.close();
+        return courseTitles;
     }
 }

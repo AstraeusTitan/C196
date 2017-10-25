@@ -17,13 +17,21 @@ public class TermListDisplay extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_term_list_display);
 
+        setHandlers();
+    }
+
+    private void loadTermList() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(DatabaseContract.SELECT_ALL_TERMS, new String[] {});
+        Cursor cursor = db.rawQuery(DatabaseContract.SELECT_ALL_TERMS, new String[]{});
 
         ListView termsList = (ListView) findViewById(R.id.termsList);
         TermListAdapter adapter = new TermListAdapter(this, cursor);
         termsList.setAdapter(adapter);
+    }
+
+    private void setHandlers() {
+        ListView termsList = (ListView) findViewById(R.id.termsList);
         termsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -49,5 +57,25 @@ public class TermListDisplay extends AppCompatActivity {
                 startActivity(new Intent(TermListDisplay.this, TermDetailDisplay.class));
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateList();
+    }
+
+    private void updateList() {
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(DatabaseContract.SELECT_ALL_TERMS, new String[]{});
+
+        ListView termsList = (ListView) findViewById(R.id.termsList);
+        TermListAdapter adapter = (TermListAdapter) termsList.getAdapter();
+        if(adapter == null){
+            termsList.setAdapter(new TermListAdapter(this, cursor));
+        } else {
+            adapter.swapCursor(cursor);
+        }
     }
 }

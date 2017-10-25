@@ -15,8 +15,21 @@
     <string name="mentor">Mentor</string>
     <string name="phoneNumber">Phone Number</string>
     <string name="email">Email</string>
+    <string name="assessment">Assessment</string>
+    <string name="assessments">Assessments</string>
+    <string name="assessmentDetail">Assessment Detail</string>
+    <string name="assessmentTitle">Assessment Title</string>
+    <string name="addAssessment">Add Assessment</string>
     <string name="title">Title</string>
     <string name="save">Save</string>
     <string name="dateFormatHint">DD/MM/YYYY</string>
     <string name="rightArrow">-></string>
+    <string name="due">Due</string>
+    <string name="type">Type</string>
+    <string name="delete">Delete</string>
+    <string name="add_course">Add Course</string>
+    <string name="add_note">Add Note</string>
+    <string name="notes">Notes</string>
+    <string name="note_detail">Note Detail</string>
+    <string name="share">Share</string>
 </resources>

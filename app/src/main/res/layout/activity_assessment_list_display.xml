@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.development.astraeus.c196.TermListDisplay">
+    tools:context="com.development.astraeus.c196.AssessmentListDisplay">
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/addCourseButton"
+        android:id="@+id/addAssessmentButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
@@ -20,7 +20,7 @@
         android:layout_marginEnd="16dp" />
 
     <ListView
-        android:id="@+id/coursesList"
+        android:id="@+id/assessmentsList"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
