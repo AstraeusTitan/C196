@@ -1,18 +1,26 @@
 package com.development.astraeus.c196;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -27,16 +35,16 @@ import java.util.List;
 public class CourseDetailDisplay extends AppCompatActivity {
     private boolean updateCourse = false;
     private static List<String> statuses;
+    private SharedPreferences mSharedPreferences;
+    public static final String START_REMINDER_NAME = "courseStart";
+    public static final String END_REMINDER_NAME = "courseEnd";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_course_detail_display);
 
-        int courseId = getIntent().getIntExtra("courseId", -1);
-        if(courseId != -1){
-            updateCourse = true;
-        }
+        mSharedPreferences = getPreferences(0);
 
         setHandlers();
         setSpinners();
@@ -45,19 +53,45 @@ public class CourseDetailDisplay extends AppCompatActivity {
     }
 
     private void setHandlers() {
-        TextView startField = (TextView) findViewById(R.id.courseStartField);
+        final TextView startField = (TextView) findViewById(R.id.courseStartField);
         startField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showDatePicker(v);
             }
         });
+        startField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-        TextView expectedEndField = (TextView) findViewById(R.id.courseExpectedEnd);
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                long date = parseDateField(startField);
+                updateReminder(START_REMINDER_NAME, date);
+            }
+        });
+
+        final TextView expectedEndField = (TextView) findViewById(R.id.courseExpectedEnd);
         expectedEndField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showDatePicker(v);
+            }
+        });
+        expectedEndField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                long date = parseDateField(expectedEndField);
+                updateReminder(END_REMINDER_NAME, date);
             }
         });
 
@@ -146,6 +180,22 @@ public class CourseDetailDisplay extends AppCompatActivity {
                 intent.putExtra("courseId", courseId);
                 intent.putExtra("content", content);
                 startActivity(intent);
+            }
+        });
+
+        CheckBox startReminderToggle = (CheckBox) findViewById(R.id.startReminderToggle);
+        startReminderToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                updateReminder(START_REMINDER_NAME, parseDateField(startField));
+            }
+        });
+
+        CheckBox endReminderToggle = (CheckBox) findViewById(R.id.endReminderToggle);
+        endReminderToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                updateReminder(END_REMINDER_NAME, parseDateField(expectedEndField));
             }
         });
     }
@@ -283,7 +333,6 @@ public class CourseDetailDisplay extends AppCompatActivity {
         }
     }
 
-    @SuppressLint("SimpleDateFormat")
     private void saveToDB() {
         DatabaseHelper dbHelper = new DatabaseHelper(this);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -304,26 +353,8 @@ public class CourseDetailDisplay extends AppCompatActivity {
         courseValues.put(DatabaseContract.Courses.COLUMN_MENTOR_PHONE_NUMBER, phoneNumberField.getText().toString());
         courseValues.put(DatabaseContract.Courses.COLUMN_MENTOR_EMAIL, emailField.getText().toString());
         courseValues.put(DatabaseContract.Courses.COLUMN_STATUS, (String) statusSelector.getSelectedItem());
-        try{
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime((new SimpleDateFormat("dd/MM/yyyy")).parse(startField.getText().toString()));
-            long startDate = calendar.getTimeInMillis();
-            courseValues.put(DatabaseContract.Courses.COLUMN_START, startDate);
-        } catch (ParseException ignored) {
-            Calendar calendar = Calendar.getInstance();
-            long now = calendar.getTimeInMillis();
-            courseValues.put(DatabaseContract.Courses.COLUMN_START, now);
-        }
-        try{
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime((new SimpleDateFormat("dd/MM/yyyy")).parse(expectedEndField.getText().toString()));
-            long endDate = calendar.getTimeInMillis();
-            courseValues.put(DatabaseContract.Courses.COLUMN_EXPECTED_END, endDate);
-        } catch (ParseException ignored) {
-            Calendar calendar = Calendar.getInstance();
-            long now = calendar.getTimeInMillis();
-            courseValues.put(DatabaseContract.Courses.COLUMN_EXPECTED_END, now);
-        }
+        courseValues.put(DatabaseContract.Courses.COLUMN_START, parseDateField(startField));
+        courseValues.put(DatabaseContract.Courses.COLUMN_START, parseDateField(expectedEndField));
         if(updateCourse){
             db.update(DatabaseContract.Courses.TABLE_NAME, courseValues, DatabaseContract.Courses._ID + "=?",
                     new String[]{"" + getIntent().getIntExtra("courseId", -1)});
@@ -339,6 +370,77 @@ public class CourseDetailDisplay extends AppCompatActivity {
 
             db.delete(DatabaseContract.Courses.TABLE_NAME, DatabaseContract.Courses._ID + "=?", new String[]{"" + getIntent().getIntExtra("courseId", -1)});
         }
+    }
+
+    private void updateReminder(String reminderName, long date){
+        boolean set = mSharedPreferences.getBoolean(reminderName + "Set", false);
+        boolean toggle;
+        CheckBox checkBox;
+        switch (reminderName){
+            case START_REMINDER_NAME:
+                checkBox = (CheckBox) findViewById(R.id.startReminderToggle);
+                toggle = checkBox.isChecked();
+                break;
+            case END_REMINDER_NAME:
+                checkBox = (CheckBox) findViewById(R.id.startReminderToggle);
+                toggle = checkBox.isChecked();
+                break;
+            default:
+                toggle = false;
+                break;
+        }
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        if(toggle){
+            if(set){
+                removeReminder(reminderName, mSharedPreferences.getLong(reminderName, 0));
+            }
+            setReminder(reminderName, date);
+            editor.putBoolean(reminderName + "Set", true);
+            editor.putLong(reminderName, date);
+        } else {
+            if(set){
+                removeReminder(reminderName, mSharedPreferences.getLong(reminderName, 0));
+            }
+            editor.putBoolean(reminderName + "Set", false);
+            editor.putLong(reminderName, 0);
+        }
+        editor.apply();
+    }
+
+    private void setReminder(String reminderName, long date){
+        long reminderAmount = 24*60*60*1000;    //24 hours in millis
+        long time = date - reminderAmount;
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, time, createAlarmIntent(reminderName, date));
+    }
+
+    private void removeReminder(String reminderName, long date){
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(createAlarmIntent(reminderName, date));
+    }
+
+    private PendingIntent createAlarmIntent(String reminderName, long date){
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        intent.putExtra("reminderName", reminderName);
+        intent.putExtra("date", date);
+        EditText titleField = (EditText) findViewById(R.id.courseTitleField);
+        String title = titleField.getText().toString();
+        intent.putExtra("content", title);
+        return PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private long parseDateField(TextView field){
+        long out;
+        try{
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime((new SimpleDateFormat("dd/MM/yyyy")).parse(field.getText().toString()));
+            out = calendar.getTimeInMillis();
+        } catch (ParseException ignored) {
+            Calendar calendar = Calendar.getInstance();
+            out = calendar.getTimeInMillis();
+        }
+        return out;
     }
 
     private void showDatePicker(View view){

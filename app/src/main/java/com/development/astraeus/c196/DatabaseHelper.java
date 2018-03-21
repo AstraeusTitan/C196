@@ -125,4 +125,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         coursesCursor.close();
         return courseTitles;
     }
+
+    public int numberOfCoursesForTerm(int termId){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor coursesCursor = db.rawQuery(DatabaseContract.SELECT_ALL_COURSES_BY_TERM, new String[]{"" + termId});
+        List<String> courseTitles = new ArrayList<>();
+        if(coursesCursor.moveToFirst()){
+            do {
+                courseTitles.add(coursesCursor.getString(coursesCursor.getColumnIndexOrThrow(DatabaseContract.Courses.COLUMN_TITLE)));
+            } while (coursesCursor.moveToNext());
+        }
+        coursesCursor.close();
+        return courseTitles.size();
+    }
 }

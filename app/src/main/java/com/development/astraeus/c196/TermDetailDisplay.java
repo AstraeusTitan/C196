@@ -73,8 +73,10 @@ public class TermDetailDisplay extends AppCompatActivity {
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                deleteFromDB();
-                finish();
+                if(safeToDelete()){
+                    deleteFromDB();
+                    finish();
+                }
             }
         });
 
@@ -185,6 +187,12 @@ public class TermDetailDisplay extends AppCompatActivity {
 
             db.delete(DatabaseContract.Terms.TABLE_NAME, DatabaseContract.Terms._ID + "=?", new String[]{"" + getIntent().getIntExtra("termId", -1)});
         }
+    }
+
+    private boolean safeToDelete(){
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
+        int termId = getIntent().getIntExtra("termId", -1);
+        return dbHelper.numberOfCoursesForTerm(termId) == 0;
     }
 
     private void showDatePicker(View view){

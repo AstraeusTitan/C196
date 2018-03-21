@@ -1,14 +1,21 @@
 package com.development.astraeus.c196;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -22,17 +29,22 @@ import java.util.List;
 public class AssessmentDetailDisplay extends AppCompatActivity {
     private boolean updateAssessment = false;
     private static List<String> types;
+    private SharedPreferences mSharedPreferences;
+    public static final String DUE_REMINDER_NAME = "dueDate";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_assessment_detail_display);
 
+        mSharedPreferences = getPreferences(0);
+
         setHandlers();
         setSpinners();
         setFields();
     }
 
+    @SuppressLint("SimpleDateFormat")
     private void setFields() {
         int assessmentId = getIntent().getIntExtra("assessmentId", -1);
         if(assessmentId != -1){
@@ -48,11 +60,24 @@ public class AssessmentDetailDisplay extends AppCompatActivity {
     }
 
     private void setHandlers() {
-        TextView startField = (TextView) findViewById(R.id.dueDateField);
-        startField.setOnClickListener(new View.OnClickListener() {
+        final TextView dueDateField = (TextView) findViewById(R.id.dueDateField);
+        dueDateField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showDatePicker(v);
+            }
+        });
+        dueDateField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                long date = parseDateField(dueDateField);
+                updateReminder(DUE_REMINDER_NAME, date);
             }
         });
 
@@ -120,17 +145,7 @@ public class AssessmentDetailDisplay extends AppCompatActivity {
         int courseId = dbHelper.getCourseIdFromTitle((String) courseSelector.getSelectedItem());
         assessmentValues.put(DatabaseContract.Assessments.COLUMN_COURSE_ID, courseId);
         assessmentValues.put(DatabaseContract.Assessments.COLUMN_TYPE, (String) typeSelector.getSelectedItem());
-
-        try{
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime((new SimpleDateFormat("dd/MM/yyyy")).parse(dueDateField.getText().toString()));
-            long dueDate = calendar.getTimeInMillis();
-            assessmentValues.put(DatabaseContract.Assessments.COLUMN_DUE, dueDate);
-        } catch (ParseException ignored) {
-            Calendar calendar = Calendar.getInstance();
-            long now = calendar.getTimeInMillis();
-            assessmentValues.put(DatabaseContract.Assessments.COLUMN_DUE, now);
-        }
+        assessmentValues.put(DatabaseContract.Assessments.COLUMN_DUE, parseDateField(dueDateField));
 
         if(updateAssessment){
             db.update(DatabaseContract.Assessments.TABLE_NAME, assessmentValues, DatabaseContract.Assessments._ID + "=?",
@@ -146,6 +161,64 @@ public class AssessmentDetailDisplay extends AppCompatActivity {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
             db.delete(DatabaseContract.Assessments.TABLE_NAME, DatabaseContract.Assessments._ID + "=?", new String[]{"" + getIntent().getIntExtra("assessmentId", -1)});
         }
+    }
+
+    private void updateReminder(String reminderName, long date){
+        boolean set = mSharedPreferences.getBoolean(reminderName + "Set", false);
+        CheckBox checkBox = (CheckBox) findViewById(R.id.dueReminderToggle);
+        boolean toggle = checkBox.isChecked();
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        if(toggle){
+            if(set){
+                removeReminder(reminderName, mSharedPreferences.getLong(reminderName, 0));
+            }
+            setReminder(reminderName, date);
+            editor.putBoolean(reminderName + "Set", true);
+            editor.putLong(reminderName, date);
+        } else {
+            if(set){
+                removeReminder(reminderName, mSharedPreferences.getLong(reminderName, 0));
+            }
+            editor.putBoolean(reminderName + "Set", false);
+            editor.putLong(reminderName, 0);
+        }
+        editor.apply();
+    }
+
+    private void setReminder(String reminderName, long date){
+        long reminderAmount = 24*60*60*1000;    //24 hours in millis
+        long time = date - reminderAmount;
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, time, createAlarmIntent(reminderName, date));
+    }
+
+    private void removeReminder(String reminderName, long date){
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(createAlarmIntent(reminderName, date));
+    }
+
+    private PendingIntent createAlarmIntent(String reminderName, long date){
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        intent.putExtra("reminderName", reminderName);
+        intent.putExtra("date", date);
+        EditText titleField = (EditText) findViewById(R.id.assessmentTitleField);
+        String title = titleField.getText().toString();
+        intent.putExtra("content", title);
+        return PendingIntent.getBroadcast(this, 1, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    @SuppressLint("SimpleDateFormat")
+    private long parseDateField(TextView field){
+        long out;
+        try{
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime((new SimpleDateFormat("dd/MM/yyyy")).parse(field.getText().toString()));
+            out = calendar.getTimeInMillis();
+        } catch (ParseException ignored) {
+            Calendar calendar = Calendar.getInstance();
+            out = calendar.getTimeInMillis();
+        }
+        return out;
     }
 
     private void showDatePicker(View view){
